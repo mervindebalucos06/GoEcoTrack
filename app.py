@@ -7,7 +7,7 @@ st.markdown('<link href="https://fonts.googleapis.com/css2?family=Gluten:wght@10
 # Function to create a navigation bar
 def create_navbar():
     # Add your team name on the left
-    st.markdown('<h1 style="text-align: left; color: green; font-family: Raleway, sans-serif;">GoEcoTrack</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 style="text-align: center; color: green; font-family: Raleway, sans-serif;">GoEcoTrack</h1>', unsafe_allow_html=True)
 
     # Add navigation links on the right
     st.markdown(
@@ -18,7 +18,7 @@ def create_navbar():
                 flex-wrap: wrap;
                 align-content: center;
                 justify-content: center;
-                background-color: #333;
+               
                 font-family: 'Poppins', sans-serif;
             }
 
