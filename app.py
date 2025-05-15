@@ -1,6 +1,7 @@
 import streamlit as st
 
-st.set_page_config(layout="wide", page_title="Carbon Footprint Calculator")
+
+st.set_page_config(layout="wide", page_title="GoEcoTrack", page_icon="🌍")
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Gluten:wght@100..900&family=Raleway:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 
@@ -182,58 +183,97 @@ def section4():
         meals = st.number_input("Meals", 0, key="meals_input")
         
 
-    # Normalize inputs
+       # Normalize inputs
     if distance > 0:
         distance = distance * 365  # Convert daily distance to yearly
+
     if electricity > 0:
-        electricity = electricity * 12  # Convert monthly electricity to yearly
+        electricity = electricity * 12  # Convert monthly to yearly
+
+    if waste > 0:
+        waste = waste * 52  # Convert weekly to yearly
+
     if meals > 0:
         meals = meals * 365  # Convert daily meals to yearly
-    if waste > 0:
-        waste = waste * 52  # Convert weekly waste to yearly
 
-    # Calculate carbon emissions
-    transportation_emissions = EMISSION_FACTORS[country]["Transportation"] * distance
-    electricity_emissions = EMISSION_FACTORS[country]["Electricity"] * electricity
-    diet_emissions = EMISSION_FACTORS[country]["Diet"] * meals
-    waste_emissions = EMISSION_FACTORS[country]["Waste"] * waste
+    # Retrieve emission factors
+    ef = EMISSION_FACTORS[country]
 
-    # Convert emissions to tonnes and round off to 2 decimal points
-    transportation_emissions = round(transportation_emissions / 1000, 2)
-    electricity_emissions = round(electricity_emissions / 1000, 2)
-    diet_emissions = round(diet_emissions / 1000, 2)
-    waste_emissions = round(waste_emissions / 1000, 2)
+    # Calculate emissions
+    transportation_emissions = distance * ef["Transportation"]
+    electricity_emissions = electricity * ef["Electricity"]
+    waste_emissions = waste * ef["Waste"]
+    food_emissions = meals * ef["Diet"]
 
-    # Calculate total emissions
-    total_emissions = round(
-        transportation_emissions + electricity_emissions + diet_emissions + waste_emissions, 2
+    total_emissions = (
+        transportation_emissions +
+        electricity_emissions +
+        waste_emissions +
+        food_emissions
     )
-    
 
-    if st.button("Calculate CO2 Emissions"):
+    # Display results
+    st.markdown("### 🧾 Estimated Annual Carbon Footprint (in kgCO₂):")
+    st.success(f"🚗 Transportation: **{transportation_emissions:.2f} kgCO₂**")
+    st.success(f"💡 Electricity: **{electricity_emissions:.2f} kgCO₂**")
+    st.success(f"🗑️ Waste: **{waste_emissions:.2f} kgCO₂**")
+    st.success(f"🍽️ Food: **{food_emissions:.2f} kgCO₂**")
+    st.markdown("----")
+    st.markdown(f"### 🌱 Your Total Estimated Annual Carbon Footprint is **{total_emissions:.2f} kgCO₂**")
 
-        # Display results
-        st.header("Results")
+        # Calculate emissions
+    emission_factors = EMISSION_FACTORS[country]
+    total_transport_emission = distance * emission_factors["Transportation"]
+    total_electricity_emission = electricity * emission_factors["Electricity"]
+    total_waste_emission = waste * emission_factors["Waste"]
+    total_diet_emission = meals * emission_factors["Diet"]
 
-        col3, col4 = st.columns(2)
+    total_emission = total_transport_emission + total_electricity_emission + total_waste_emission + total_diet_emission
 
-        with col3:
-            st.subheader("Carbon Emissions by Category")
-            st.info(f"🚗 Transportation: {transportation_emissions} tonnes CO2 per year")
-            st.info(f"💡 Electricity: {electricity_emissions} tonnes CO2 per year")
-            st.info(f"🍽️ Diet: {diet_emissions} tonnes CO2 per year")
-            st.info(f"🗑️ Waste: {waste_emissions} tonnes CO2 per year")
+    st.success(f"🌱 Your estimated annual carbon footprint is **{total_emission:.2f} kgCO₂**.")
 
-        with col4:
-            st.subheader("Total Carbon Footprint")
-            if total_emissions<=7:
-                st.success(f"🌍 Your total carbon footprint is: {total_emissions} tonnes CO2 per year")
-                st.balloons()
-            elif total_emissions>7:
-                st.error(f"🌍 Your total carbon footprint is: {total_emissions} tonnes CO2 per year")
-            # st.success(f"🌍 Your total carbon footprint is: {total_emissions} tonnes CO2 per year")
-            st.warning("In 2021, CO2 emissions per capita for Philippines was 1.9 tonnes of CO2 per capita. Between 1972 and 2021, CO2 emissions per capita of Philippines grew substantially from 0.39 to 1.9 tonnes of CO2 per capita rising at an increasing annual rate that reached a maximum of 9.41% in 2021")
-     
+    # Provide recommendations
+    st.header("📋 Personalized Recommendations")
+
+    # Transportation recommendations
+    if total_transport_emission > 3000:
+        st.warning("🚗 Your transportation emissions are quite high. Consider using public transport, carpooling, biking, or walking whenever possible.")
+    elif total_transport_emission > 1000:
+        st.info("🚲 You're doing okay, but you can still reduce emissions by planning more efficient travel routes or using greener vehicles.")
+    else:
+        st.success("✅ Great job! Your transport emissions are low. Keep up the sustainable travel habits.")
+
+    # Electricity recommendations
+    if total_electricity_emission > 4000:
+        st.warning("💡 Your electricity usage is high. Switch to LED bulbs, unplug unused devices, and explore solar options if feasible.")
+    elif total_electricity_emission > 1500:
+        st.info("🔌 Moderate electricity use. Try using energy-efficient appliances and reducing air conditioning or heating time.")
+    else:
+        st.success("✅ Your electricity use is efficient. Keep it up!")
+
+    # Waste recommendations
+    if total_waste_emission > 500:
+        st.warning("🗑️ You generate a lot of waste. Consider composting, recycling, and reducing single-use plastics.")
+    elif total_waste_emission > 200:
+        st.info("♻️ You're doing okay, but try to cut down food and packaging waste where possible.")
+    else:
+        st.success("✅ Minimal waste generation – excellent work!")
+
+    # Diet recommendations
+    if total_diet_emission > 3000:
+        st.warning("🍖 High carbon footprint from food. Reduce red meat consumption, support local produce, and waste less food.")
+    elif total_diet_emission > 1500:
+        st.info("🥗 Moderate emissions from diet. Consider adding more plant-based meals to your routine.")
+    else:
+        st.success("✅ Your diet has a low carbon footprint. Keep making climate-conscious food choices!")
+
+    st.markdown("---")
+    st.markdown("🌍 **Every small step counts. Thank you for contributing to a greener planet!**")
+
+
+def button():
+    st.markdown('<a href="#section4"><button style="background-color: #097969; border: none; color: white; padding: 10px 20px; text-align: center; font-size: 16px; border-radius: 5px; cursor: pointer; font-family: Poppins;">Try the Carbon Calculator</button></a>', unsafe_allow_html=True)
+
 def section5():    
     faq_items = {
         # "What is a carbon footprint?": "A carbon footprint is the total amount of greenhouse gases, such as carbon dioxide and methane, emitted directly or indirectly by human activities. It measures the impact of these activities on the environment in terms of their contribution to climate change.",        
@@ -316,13 +356,13 @@ def create_sections():
     )
     
     # Use the defined CSS ID in your HTML content
-    st.write('<div id="Home-container"><h3>Use our interactive calculator to learn your Carbon Footprint.</h3></div>', unsafe_allow_html=True)
+    st.write('<div id="Home-container"><h3>Calculate your carbon footprint in just a few clicks.</h3></div>', unsafe_allow_html=True)
 
     st.markdown('<section class="sections" id="section1"><h1>What is a Carbon Footprint?</h1></section>', unsafe_allow_html=True)
     section1()
     st.markdown("---")
 
-    st.markdown('<section class="sections" id="section2"><h1>Why to calculate your Carbon Footprint?</h1></section>', unsafe_allow_html=True)
+    st.markdown('<section class="sections" id="section2"><h1>Why calculate your Carbon Footprint?</h1></section>', unsafe_allow_html=True)
     section2()
     st.markdown("---")
 
